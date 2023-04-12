@@ -1,5 +1,6 @@
 package com.sunnyweather.android.ui.weather
 
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -26,28 +27,33 @@ class WeatherActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val decorView = window.decorView
+        decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        window.statusBarColor = Color.TRANSPARENT
         setContentView(R.layout.activity_weather)
-        if(viewModel.locationLng.isEmpty()){
+        if (viewModel.locationLng.isEmpty()) {
             viewModel.locationLng = intent.getStringExtra("location_lng") ?: ""
         }
-        if (viewModel.locationLat.isEmpty()){
+        if (viewModel.locationLat.isEmpty()) {
             viewModel.locationLat = intent.getStringExtra("location_lat") ?: ""
         }
-        if (viewModel.placeName.isEmpty()){
+        if (viewModel.placeName.isEmpty()) {
             viewModel.placeName = intent.getStringExtra("place_name") ?: ""
         }
         viewModel.weatherLiveData.observe(this, Observer { result ->
             val weather = result.getOrNull()
             if (weather != null) {
                 showWeatherInfo(weather)
-            }else{
+            } else {
                 Toast.makeText(this, "无法成功获取天气信息", Toast.LENGTH_SHORT).show()
                 result.exceptionOrNull()?.printStackTrace()
             }
         })
-        viewModel.refreshWeather(viewModel.locationLng,viewModel.locationLat)
+        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
     }
-    private fun showWeatherInfo(weather: Weather){
+
+    private fun showWeatherInfo(weather: Weather) {
         placeName.text = viewModel.placeName
         val realtime = weather.realtime
         val daily = weather.daily
@@ -61,10 +67,10 @@ class WeatherActivity : AppCompatActivity() {
         //填充forecast.xml布局中的数据
         forecastLayout.removeAllViews()
         val days = daily.skycon.size
-        for (i in 0 until days){
+        for (i in 0 until days) {
             val skycon = daily.skycon[i]
             val temperature = daily.temperature[i]
-            val view = LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false)
+            val view = LayoutInflater.from(this).inflate(R.layout.forecast_item, forecastLayout, false)
             val dateInfo = view.findViewById(R.id.dateInfo) as TextView
             val skyIcon = view.findViewById(R.id.skyIcon) as ImageView
             val skyInfo = view.findViewById(R.id.skyInfo) as TextView
